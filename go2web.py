@@ -237,7 +237,12 @@ def search_google(query: str, client: HTTPClient) -> List[str]:
 def main():
     parser = argparse.ArgumentParser(
         description='go2web - HTTP over TCP Sockets',
-        prog='go2web'
+        prog='go2web',
+        epilog='Examples:\n'
+               '  %(prog)s -u https://example.com\n'
+               '  %(prog)s -s machine learning\n'
+               '  %(prog)s -h',
+        formatter_class=argparse.RawDescriptionHelpFormatter
     )
     
     group = parser.add_mutually_exclusive_group(required=False)
@@ -259,6 +264,17 @@ def main():
         if not args.url.startswith('http'):
             args.url = 'http://' + args.url
         
+        # Validate URL format
+        try:
+            parsed = urlparse(args.url)
+            if not parsed.netloc:
+                print(f"Error: Invalid URL format: {args.url}", file=sys.stderr)
+                sys.exit(1)
+        except Exception as e:
+            print(f"Error: Invalid URL: {e}", file=sys.stderr)
+            sys.exit(1)
+        
+        print(f"Fetching: {args.url}\n")
         status, headers, body = client.request('GET', args.url)
         
         if status == 200:
@@ -275,6 +291,7 @@ def main():
                 print(readable)
         else:
             print(f"Error: HTTP {status}", file=sys.stderr)
+            sys.exit(1)
     
     elif args.search:
         # Handle search request
@@ -288,6 +305,7 @@ def main():
                 print(f"{i}. {result}\n")
         else:
             print("No results found.", file=sys.stderr)
+            sys.exit(1)
 
 
 if __name__ == '__main__':
