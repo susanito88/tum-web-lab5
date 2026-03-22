@@ -250,6 +250,9 @@ def main():
     group.add_argument('-s', '--search', metavar='SEARCH_TERM', nargs='+', 
                       help='Search using Google and print top 10 results')
     
+    parser.add_argument('--no-cache', action='store_true', help='Disable caching')
+    parser.add_argument('--no-redirects', action='store_true', help='Disable redirect following')
+    
     args = parser.parse_args()
     
     # Check if no arguments provided
@@ -257,7 +260,10 @@ def main():
         parser.print_help()
         return
     
-    client = HTTPClient(enable_cache=True, enable_redirects=True)
+    client = HTTPClient(
+        enable_cache=not args.no_cache,
+        enable_redirects=not args.no_redirects
+    )
     
     if args.url:
         # Handle URL request
