@@ -17,6 +17,11 @@ from typing import Optional, Dict, List, Tuple
 from urllib.parse import urlparse, urljoin, parse_qs
 from pathlib import Path
 
+# Force UTF-8 output on Windows
+if sys.stdout.encoding != 'utf-8':
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
 # HTTP Cache configuration
 CACHE_DIR = Path.home() / '.go2web_cache'
 CACHE_DIR.mkdir(exist_ok=True)
