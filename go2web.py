@@ -5,6 +5,7 @@ A command-line program that makes HTTP requests and displays human-readable resp
 """
 
 import socket
+import ssl
 import sys
 import argparse
 import json
@@ -101,6 +102,14 @@ class HTTPClient:
         try:
             # Create socket
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            
+            # Wrap with SSL for HTTPS
+            if parsed.scheme == 'https':
+                context = ssl.create_default_context()
+                context.check_hostname = False
+                context.verify_mode = ssl.CERT_NONE  # Don't verify for lab purposes
+                sock = context.wrap_socket(sock, server_hostname=host)
+            
             sock.connect((host, port))
             sock.sendall(http_request.encode())
             
