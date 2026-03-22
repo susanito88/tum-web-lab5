@@ -300,8 +300,14 @@ def main():
     
     parser.add_argument('--no-cache', action='store_true', help='Disable caching')
     parser.add_argument('--no-redirects', action='store_true', help='Disable redirect following')
+    parser.add_argument('--debug', action='store_true', help='Enable debug output')
     
     args = parser.parse_args()
+    
+    # Enable debug mode if requested
+    if args.debug:
+        import sys
+        sys.stderr.write("[DEBUG] Debug mode enabled\n")
     
     # Check if no arguments provided
     if not args.url and not args.search:
