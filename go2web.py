@@ -209,15 +209,25 @@ def search_google(query: str, client: HTTPClient) -> List[str]:
         # Look for result containers
         import re
         
-        # Pattern for Google search results
-        pattern = r'<div[^>]*data-sokoban-container[^>]*>.*?<a[^>]*href="([^"]*)"[^>]*>([^<]+)</a>'
-        matches = re.findall(pattern, body, re.DOTALL)
+        # Multiple patterns to handle different Google result formats
+        patterns = [
+            r'<a[^>]*href="([^"]*)"[^>]*><h\d[^>]*>([^<]+)</h\d>',  # Result title links
+            r'<div[^>]*class="yuRUbf"[^>]*>.*?<a[^>]*href="([^"]*)"[^>]*>([^<]+)</a>',
+        ]
         
-        for url, title in matches[:10]:
-            if url.startswith('http') and not 'google.com' in url:
-                results.append(f"{title}\n{url}")
+        for pattern in patterns:
+            matches = re.findall(pattern, body, re.DOTALL | re.IGNORECASE)
+            for url, title in matches[:10]:
+                # Filter out Google's own URLs and duplicates
+                if url.startswith('http') and not 'google.com' in url and not 'webcache' in url:
+                    title_clean = title.strip()[:100]
+                    result_entry = f"{title_clean}\n{url}"
+                    if result_entry not in results:
+                        results.append(result_entry)
+                        if len(results) >= 10:
+                            return results
         
-        return results
+        return results[:10]
     
     except Exception as e:
         print(f"Error during search: {e}", file=sys.stderr)
