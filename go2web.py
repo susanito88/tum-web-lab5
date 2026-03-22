@@ -13,6 +13,8 @@ import html.parser
 import os
 import hashlib
 import pickle
+import re
+import urllib.parse
 from typing import Optional, Dict, List, Tuple
 from urllib.parse import urlparse, urljoin, parse_qs
 from pathlib import Path
@@ -208,10 +210,15 @@ def strip_html(html_content: str) -> str:
 
 def search_google(query: str, client: HTTPClient) -> List[str]:
     """Search using Google and extract top 10 results."""
-    search_url = f"https://www.google.com/search?q={query.replace(' ', '+')}"
+    search_url = f"https://www.google.com/search?q={query.replace(' ', '+')}&num=10"
     
     try:
-        status, headers, body = client.request('GET', search_url)
+        # Add additional headers to appear more like a real browser
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+        
+        status, resp_headers, body = client.request('GET', search_url, headers)
         
         if status != 200:
             print(f"Error: Google search returned status {status}", file=sys.stderr)
@@ -223,23 +230,50 @@ def search_google(query: str, client: HTTPClient) -> List[str]:
         # Look for result containers
         import re
         
-        # Multiple patterns to handle different Google result formats
+        # More comprehensive patterns to handle different Google result formats  
         patterns = [
-            r'<a[^>]*href="([^"]*)"[^>]*><h\d[^>]*>([^<]+)</h\d>',  # Result title links
-            r'<div[^>]*class="yuRUbf"[^>]*>.*?<a[^>]*href="([^"]*)"[^>]*>([^<]+)</a>',
+            # Pattern 1: Standard result with hX tag
+            r'<a\s+href="(/url\?q=([^"&]+)[^"]*)"\s+[^>]*><div[^>]*><span>[^<]*</span></div><div[^>]*><h\d[^>]*>([^<]+)</h\d>',
+            # Pattern 2: Result with direct link
+            r'<a\s+href="([^"]*(?:https?://[^"]*)?)"[^>]*>(?:<h\d[^>]*>)?([^<]+)(?:</h\d>)?</a>',
+            # Pattern 3: Data-sokoban-container pattern
+            r'href="([^"]*?)"[^>]*>([^<]+)</a>.*?(?=<a href|$)',
         ]
         
         for pattern in patterns:
+            if len(results) >= 10:
+                break
             matches = re.findall(pattern, body, re.DOTALL | re.IGNORECASE)
-            for url, title in matches[:10]:
-                # Filter out Google's own URLs and duplicates
-                if url.startswith('http') and not 'google.com' in url and not 'webcache' in url:
+            for match in matches[:10]:
+                if len(results) >= 10:
+                    break
+                    
+                # Extract URL and title from different pattern groups
+                if len(match) == 3:
+                    url = match[1] if match[1] else match[0]
+                    title = match[2]
+                elif len(match) == 2:
+                    url = match[0]
+                    title = match[1]
+                else:
+                    continue
+                
+                # Clean up URL if it's Google's redirect URL
+                if '/url?q=' in url:
+                    import urllib.parse
+                    try:
+                        parsed = urllib.parse.parse_qs(urllib.parse.urlparse(url).query)
+                        url = parsed.get('q', [url])[0]
+                    except:
+                        pass
+                
+                # Filter out invalid URLs and Google's own URLs
+                if url.startswith('http') and 'google.com' not in url and 'webcache' not in url:
                     title_clean = title.strip()[:100]
-                    result_entry = f"{title_clean}\n{url}"
-                    if result_entry not in results:
-                        results.append(result_entry)
-                        if len(results) >= 10:
-                            return results
+                    if title_clean:  # Only add if title exists
+                        result_entry = f"{title_clean}\n{url}"
+                        if result_entry not in results:  # Avoid duplicates
+                            results.append(result_entry)
         
         return results[:10]
     
