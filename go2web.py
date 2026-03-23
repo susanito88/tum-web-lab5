@@ -204,8 +204,10 @@ class HTTPClient:
                     redirect_url = response_headers.get('location')
                     if redirect_url:
                         self.redirect_count += 1
+                        print(f"[{status_code}] Redirect: {url}")
                         if not redirect_url.startswith('http'):
                             redirect_url = urljoin(url, redirect_url)
+                        print(f"        → {redirect_url}", file=sys.stderr)
                         next_method = 'GET' if status_code == 303 else method
                         return self.request(next_method, redirect_url, headers)
 
