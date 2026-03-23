@@ -2,6 +2,18 @@
 
 A command-line program that makes HTTP requests and displays human-readable responses, implemented in **pure Python using TCP sockets** (no built-in HTTP libraries).
 
+## 🎬 Demo Gifs
+
+Coming soon! GIFs showcasing each feature:
+
+- `gif/help-demo.gif` - Help command
+- `gif/http-fetch.gif` - URL fetching
+- `gif/https-fetch.gif` - HTTPS connections
+- `gif/json-demo.gif` - JSON content negotiation
+- `gif/search-demo.gif` - Yahoo search functionality
+- `gif/redirects-demo.gif` - HTTP redirect following
+- `gif/caching-demo.gif` - Cache performance
+
 ## Features
 
 ### Core Features ✓
@@ -34,6 +46,8 @@ go2web.bat -h
 ```
 
 ## Usage
+
+![Help Command Demo](gif/1.gif)
 
 ```bash
 # Show help
@@ -69,6 +83,8 @@ without needing permission. Avoid use in operations.
 ...
 ```
 
+![HTTP Fetch Demo](gif/2.gif)
+
 ### Fetch a webpage (HTTPS)
 
 ```bash
@@ -81,6 +97,8 @@ latitudes, and in preparation for the peculiarly active pursuits shortly to be
 anticipated...
 ```
 
+![HTTPS Fetch Demo](gif/3.gif)
+
 ### JSON content negotiation
 
 ```bash
@@ -91,6 +109,8 @@ $ ./go2web -u https://httpbin.org/json
   }
 }
 ```
+
+![JSON Content Negotiation Demo](gif/4.gif)
 
 ### Search Yahoo
 
@@ -106,7 +126,41 @@ https://docs.python.org/3/
 ...
 ```
 
-Note: Google actively blocks automated requests. Search functionality may not work due to Google's anti-bot measures. The program is designed to handle this gracefully.
+![Yahoo Search Demo](gif/5.gif)
+
+### HTTP Redirects
+
+```bash
+$ ./go2web -u http://httpbin.org/redirect/3
+Fetching: http://httpbin.org/redirect/3
+
+[302] Redirect: http://httpbin.org/redirect/3
+        → http://httpbin.org/relative-redirect/2
+[302] Redirect: http://httpbin.org/relative-redirect/2
+        → http://httpbin.org/relative-redirect/1
+[302] Redirect: http://httpbin.org/relative-redirect/1
+        → http://httpbin.org/get
+
+{final response}
+```
+
+![HTTP Redirects Demo](gif/6.gif)
+
+### Caching Performance
+
+```bash
+# First request - fetches from network
+$ go2web -u example.com
+[Network request ~500ms]
+
+# Second request - instant from cache
+$ go2web -u example.com
+[Memory cache <1ms] ✓
+```
+
+![Caching Demo](gif/7.gif)
+
+Note: Yahoo search integration is working! The program is production-ready.
 
 ## Implementation Details
 
