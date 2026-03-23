@@ -5,13 +5,15 @@ A command-line program that makes HTTP requests and displays human-readable resp
 ## Features
 
 ### Core Features ✓
+
 - **HTTP requests via TCP sockets** - Raw HTTP protocol implementation without urllib/requests
 - **URL requests** (`-u`) - Fetch and display content from any URL (HTTP and HTTPS)
-- **Search functionality** (`-s`) - Search Google and display top 10 results
+- **Search functionality** (`-s`) - Search Yahoo and display top 10 results
 - **Human-readable output** - Strips HTML tags, presents clean text
 - **Help option** (`-h`) - Display help message
 
 ### Bonus Features ✓
+
 - **HTTP redirects** - Automatically follow 301/302/303/307/308 redirects
 - **HTTP cache** - File-based caching of responses in `~/.go2web_cache/`
 - **Content negotiation** - Handles both HTML (with tag stripping) and JSON content types
@@ -57,27 +59,30 @@ go2web.bat -h
 ## Examples
 
 ### Fetch a webpage (HTTP)
+
 ```bash
 $ ./go2web -u example.com
 Fetching: http://example.com
 
-Example DomainExample DomainThis domain is for use in documentation examples 
+Example DomainExample DomainThis domain is for use in documentation examples
 without needing permission. Avoid use in operations.
 ...
 ```
 
 ### Fetch a webpage (HTTPS)
+
 ```bash
 $ ./go2web -u https://httpbin.org/html
 Fetching: https://httpbin.org/html
 
 Herman Melville - Moby-Dick
-Availing himself of the mild, summer-cool weather that now reigned in these 
-latitudes, and in preparation for the peculiarly active pursuits shortly to be 
+Availing himself of the mild, summer-cool weather that now reigned in these
+latitudes, and in preparation for the peculiarly active pursuits shortly to be
 anticipated...
 ```
 
 ### JSON content negotiation
+
 ```bash
 $ ./go2web -u https://httpbin.org/json
 {
@@ -87,7 +92,8 @@ $ ./go2web -u https://httpbin.org/json
 }
 ```
 
-### Search Google (when available)
+### Search Yahoo
+
 ```bash
 $ ./go2web -s python programming
 Searching for: python programming
@@ -95,7 +101,7 @@ Searching for: python programming
 1. Python.org
 https://www.python.org
 
-2. Learn Python Programming  
+2. Learn Python Programming
 https://docs.python.org/3/
 ...
 ```
@@ -105,6 +111,7 @@ Note: Google actively blocks automated requests. Search functionality may not wo
 ## Implementation Details
 
 ### HTTP Client
+
 - Implements raw HTTP/1.1 protocol using Python's `socket` module
 - Supports GET requests
 - Manual header parsing
@@ -112,6 +119,7 @@ Note: Google actively blocks automated requests. Search functionality may not wo
 - SSL/TLS support for HTTPS connections
 
 ### HTML Parsing
+
 - Custom HTML stripper for human-readable output
 - Removes script and style tags
 - Cleans up whitespace
@@ -119,6 +127,7 @@ Note: Google actively blocks automated requests. Search functionality may not wo
 - Uses standard library `html.parser`
 
 ### Caching System
+
 - Cache stored in `~/.go2web_cache/`
 - MD5 hash-based file names for URL indexing
 - Pickle serialization for fast retrieval
@@ -126,22 +135,26 @@ Note: Google actively blocks automated requests. Search functionality may not wo
 - Disable with `--no-cache` flag
 
 ### Redirect Handling
+
 - Follows standard HTTP redirect codes (301, 302, 303, 307, 308)
 - Maximum 5 redirects to prevent infinite loops
 - Respects method changes on 303 redirects
 
 ### Content Negotiation
+
 - Detects Content-Type header
 - JSON responses formatted with indentation
 - HTML responses stripped of tags for readability
 - Fallback to raw content if type detection fails
 
 ### HTTPS Support
+
 - Wraps TCP socket with SSL/TLS using `ssl` module
 - Disables certificate verification for lab purposes
 - Supports secure connections to HTTPS sites
 
 ### UTF-8 Output Handling
+
 - Automatic encoding detection
 - Windows compatible UTF-8 output
 - Handles non-ASCII characters properly
